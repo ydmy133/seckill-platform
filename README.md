@@ -68,36 +68,40 @@
 | 工具 | 版本要求 | 验证命令 |
 |------|----------|----------|
 | JDK | 17+ | `java --version` |
-| Maven | 通过 Maven Wrapper 自动下载，无需手动安装 | `cd backend && ./mvnw.cmd -v` |
+| Maven | 通过 Maven Wrapper 自动下载，无需手动安装 | `cd backend && ./mvnw --version` |
 | MySQL | 8.0+ | `mysql -u root -p` |
-| Redis | Windows 移植版 | 见 Step 8 |
+| Redis | 6.0+ | `redis-cli ping` |
 | RabbitMQ | 3.12+ | 见下方说明 (需先装 Erlang) |
 | Node.js | 18+ | `node --version` |
 | npm | 9+ | `npm --version` |
 | Nginx | 1.24+ | 见 Step 21，非必需（可最后再装）|
 
-**RabbitMQ 安装 (Windows)**：
+**RabbitMQ 安装 (Linux)**：
 
 RabbitMQ 依赖 Erlang 运行时：
 
-1. 下载 Erlang OTP 26.x：https://www.erlang.org/downloads
-2. 安装 Erlang（一路 Next，默认路径即可）
-3. 下载 RabbitMQ：https://www.rabbitmq.com/install-windows.html
-4. 安装 RabbitMQ（一路 Next）
-5. 启用管理插件（可视化 Web 控制台）：
-   ```bash
-   cd "C:\Program Files\RabbitMQ Server\rabbitmq_server-3.12.x\sbin"
-   rabbitmq-plugins enable rabbitmq_management
-   ```
-6. 访问管理后台：http://localhost:15672 （默认用户名/密码：guest/guest）
-7. Spring Boot 连接 RabbitMQ 默认端口 5672，管理后台 15672
+```bash
+# 1. 安装 Erlang 和 RabbitMQ
+sudo apt install -y erlang rabbitmq-server
 
-> 提示：如果你已经有云服务器，也可以直接在服务器上装 RabbitMQ，本地开发时通过 `spring.rabbitmq.host` 指向服务器 IP。
+# 2. 启动服务
+sudo systemctl start rabbitmq-server
+
+# 3. 启用管理插件（可视化 Web 控制台）
+sudo rabbitmq-plugins enable rabbitmq_management
+
+# 4. 设置开机自启
+sudo systemctl enable rabbitmq-server
+```
+
+访问管理后台：http://localhost:15672 （默认用户名/密码：guest/guest）
+
+Spring Boot 连接 RabbitMQ 默认端口 5672，管理后台 15672。
 
 **初始化数据库**：
 ```bash
 # 使用项目中的 init.sql
-mysql -u root -p < E:\project\seckill-platform\sql\init.sql
+mysql -u root -p123123 < /home/ydmy/seckill-platform/sql/init.sql
 ```
 
 ---
@@ -231,21 +235,12 @@ Layer 3: MySQL 乐观锁 (version 字段)
 
 **怎么写**：
 
-`E:\project\seckill-platform\backend\` 目录下已经有了 `pom.xml` 和 `SeckillApplication.java`，你现在只需要做：
+`/home/ydmy/seckill-platform/backend\` 目录下已经有了 `pom.xml` 和 `SeckillApplication.java`，你现在只需要做：
 
-1. 进入 `backend/` 目录
-2. 下载 Maven Wrapper（不需要本地装 Maven）：
+4. 进入 `backend/` 目录，验证项目能编译：
    ```bash
-   cd E:\project\seckill-platform\backend
-   mvn -N wrapper:wrapper -Dmaven=3.9.6
-   ```
-   > 如果提示 mvn 命令不存在，手动下载：
-   > 复制 https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.zip
-   > 解压到 `D:\maven\`，设置环境变量 `MAVEN_HOME=D:\maven`，Path 添加 `%MAVEN_HOME%\bin`
-   
-3. 验证项目能编译：
-   ```bash
-   mvnw.cmd compile
+   cd /home/ydmy/seckill-platform/backend
+   ./mvnw compile
    ```
    看到 `BUILD SUCCESS` 就对了。
 
@@ -253,7 +248,7 @@ Layer 3: MySQL 乐观锁 (version 字段)
 
 > **面试话术**：Maven Wrapper 让项目自带构建工具版本，其他开发者 clone 后不需要手动安装 Maven，直接 `./mvnw` 就能构建，保证 CI/CD 环境一致性。Spring Boot 的 `@SpringBootApplication` 注解 = `@Configuration + @EnableAutoConfiguration + @ComponentScan` 三合一，自动配置的原理是条件注解（`@ConditionalOnClass` 等），类路径上有什么依赖就自动加载什么配置。
 
-**如何验证**：运行 `mvnw.cmd compile` 看到 BUILD SUCCESS。
+**如何验证**：运行 `./mvnw compile` 看到 BUILD SUCCESS。
 
 ---
 
@@ -263,7 +258,7 @@ Layer 3: MySQL 乐观锁 (version 字段)
 
 **写什么代码**：
 
-打开 `E:\project\seckill-platform\backend\src\main\resources\application.yml`（已有模板，改一下你的 MySQL 密码）：
+打开 `/home/ydmy/seckill-platform/backend\src\main\resources\application.yml`（已有模板，改一下你的 MySQL 密码）：
 
 ```yaml
 server:
@@ -317,8 +312,8 @@ jwt:
 
 **如何验证**：
 ```bash
-cd E:\project\seckill-platform\backend
-mvnw.cmd spring-boot:run
+cd /home/ydmy/seckill-platform/backend
+./mvnw spring-boot:run
 ```
 看到 `Started SeckillApplication in X seconds` 就成功了。如果报数据库连接错误，检查密码和 MySQL 是否启动。
 
@@ -333,7 +328,7 @@ mvnw.cmd spring-boot:run
 #### 3.1 执行建表脚本
 
 ```bash
-mysql -u root -p < E:\project\seckill-platform\sql\init.sql
+mysql -u root -p < /home/ydmy/seckill-platform/sql\init.sql
 ```
 
 > 注意：init.sql 会创建 seckill 数据库和 4 张表。如果想保留已有数据，在 MySQL 命令行中手动执行每条 CREATE TABLE。
@@ -542,7 +537,7 @@ public class SeckillApplication {
 
 **如何验证**：
 ```bash
-mvnw.cmd spring-boot:run
+./mvnw spring-boot:run
 ```
 启动不报错，应该看到 MyBatis-Plus 打印了 Entity 的扫描信息。
 没有报 `Table 'seckill.user' doesn't exist` 之类错误说明连上了。
@@ -1354,27 +1349,24 @@ curl -X POST http://localhost:8080/api/admin/products/seckill-products \
 
 ### Step 8: 安装 Redis + 配置连接
 
-**做什么**：在 Windows 上安装 Redis，然后配置 Spring Boot 连接。
+**做什么**：在 Linux 上安装 Redis，然后配置 Spring Boot 连接。
 
-#### 8.1 安装 Redis (Windows)
+#### 8.1 安装 Redis (Linux)
 
-由于 Redis 官方没有 Windows 版本，我们用社区移植版。
+```bash
+# 安装 Redis
+sudo apt install -y redis-server
 
-1. 下载 Redis for Windows：打开 https://github.com/tporadowski/redis/releases
-2. 下载 `Redis-x64-5.0.14.1.msi` 或 `.zip`
-3. 如果下载的是 zip：解压到 `D:\redis\`
-4. 启动 Redis 服务：
-   ```bash
-   D:\redis\redis-server.exe
-   ```
-   看到 "Ready to accept connections" 就启动成功了
-5. 另开一个终端验证：
-   ```bash
-   D:\redis\redis-cli.exe ping
-   ```
-   返回 `PONG` 即可
+# 启动服务
+sudo systemctl start redis-server
 
-> 如果你有 WSL2，也可以 `wsl --install` 后在 WSL 里装 Redis。不过 Windows 移植版足够开发用。
+# 设置开机自启
+sudo systemctl enable redis-server
+
+# 验证
+redis-cli ping
+```
+返回 `PONG` 即可。
 
 #### 8.2 配置 Spring Boot Redis 连接
 
@@ -1386,7 +1378,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password:     # Windows 移植版默认无密码
+      password:     # Redis 默认无密码，留空
       lettuce:
         pool:
           max-active: 50
@@ -1941,7 +1933,7 @@ server {
 
     # 静态文件（Vue build 产物）
     location / {
-        root E:/project/seckill-platform/frontend/dist;
+        root /home/ydmy/seckill-platform/frontend/dist;
         index index.html;
         try_files $uri $uri/ /index.html;  # SPA 路由回退
     }
