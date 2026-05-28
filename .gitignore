@@ -1,0 +1,46 @@
+# ====================
+# Maven / Java
+# ====================
+target/
+*.class
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+*.log
+
+# ====================
+# Node.js / Frontend
+# ====================
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.log
+
+# ====================
+# IDE
+# ====================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ====================
+# OS
+# ====================
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# ====================
+# Misc
+# ====================
+*.tmp
+*.bak
+application-local.yml
