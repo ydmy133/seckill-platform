@@ -832,7 +832,7 @@ curl -X POST http://localhost:8080/api/auth/register \
 返回 `{"code":200,"message":"success","data":null}` 表示成功。去数据库查一下：
 
 ```sql
-SELECT * FROM user;
+SELECT * FROM seckill.user;
 ```
 
 应该看到 `password` 字段是 `$2a$10$...` 开头的密文。
@@ -845,7 +845,7 @@ SELECT * FROM user;
 
 ```bash
 cd /home/ydmy/seckill-platform
-npm create vite@latest frontend -- --template vue
+npm create vite@5 frontend -- --template vue
 cd frontend
 npm install
 npm install element-plus @element-plus/icons-vue axios pinia vue-router@4
