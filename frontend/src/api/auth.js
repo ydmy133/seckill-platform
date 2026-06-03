@@ -9,3 +9,13 @@ export function register(data) {
 export function login(data) {
   return request.post('/auth/login', data)      // POST /api/auth/login
 }
+
+export function getProducts(params) {
+  return request.get('/products', { params })        // GET /api/products?page=1&size=10
+}
+export function getSeckillProducts(params) {
+  return request.get('/products/seckill', { params }) // GET /api/products/seckill?page=1&size=10
+}
+export function getSeckillDetail(seckillProductId) {
+  return request.get(`/products/seckill/${seckillProductId}`) // GET /api/products/seckill/5
+}
